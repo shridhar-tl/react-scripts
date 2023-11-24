@@ -29,16 +29,16 @@ function overrideOutput(output) {
     return configOverride.overrideOutput?.(output) ?? output;
 }
 
-function addPlugins(plugins) {
-    return configOverride.addPlugins?.(plugins) ?? plugins;
+function addPlugins(plugins, opts) {
+    return configOverride.addPlugins?.(plugins, opts) ?? plugins;
 }
 
 function overridePlugins(plugins) {
     return configOverride.overridePlugins?.(plugins) ?? plugins;
 }
 
-function overrideWebPackConfig(config) {
-    return configOverride.overrideWebPackConfig?.(config) ?? config;
+function overrideWebPackConfig(config, opts) {
+    return configOverride.overrideWebPackConfig?.(config, opts) ?? config;
 }
 
 function onBuildComplete(args) {

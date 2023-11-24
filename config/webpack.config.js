@@ -180,7 +180,7 @@ module.exports = function (webpackEnv) {
         {
           loader: require.resolve(preProcessor),
           options: {
-            sourceMap: configSettings.allowSourceMapForCSS,
+            sourceMap: true,
           },
         }
       );
@@ -567,31 +567,8 @@ module.exports = function (webpackEnv) {
     plugins: overrideConfig.overridePlugins([
       ...overrideConfig.addPlugins([
         // Generates an `index.html` file with the <script> injected.
-        new HtmlWebpackPlugin(
-          Object.assign(
-            {},
-            {
-              inject: true,
-              template: paths.appHtml,
-            },
-            isEnvProduction
-              ? {
-                minify: {
-                  removeComments: true,
-                  collapseWhitespace: true,
-                  removeRedundantAttributes: true,
-                  useShortDoctype: true,
-                  removeEmptyAttributes: true,
-                  removeStyleLinkTypeAttributes: true,
-                  keepClosingSlash: true,
-                  minifyJS: true,
-                  minifyCSS: true,
-                  minifyURLs: true,
-                },
-              }
-              : undefined
-          )
-        )]),
+        getHTMLWebpackPlugin(undefined, paths.appHtml, undefined, isEnvProduction)
+      ], { getHTMLPlugin: (filename, template, chunks) => getHTMLWebpackPlugin(filename, template, chunks, isEnvProduction) }),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
@@ -754,5 +731,36 @@ module.exports = function (webpackEnv) {
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
     performance: false,
-  });
+  }, { paths, env, webpackEnv, isEnvDevelopment, isEnvProduction });
 };
+
+function getHTMLWebpackPlugin(filename, template, chunks, isEnvProduction) {
+  const HtmlWebpackPlugin = require('html-webpack-plugin');
+  return new HtmlWebpackPlugin(
+    Object.assign(
+      {},
+      {
+        inject: true,
+        filename,
+        template,
+        chunks
+      },
+      isEnvProduction
+        ? {
+          minify: {
+            removeComments: true,
+            collapseWhitespace: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true,
+            removeEmptyAttributes: true,
+            removeStyleLinkTypeAttributes: true,
+            keepClosingSlash: true,
+            minifyJS: true,
+            minifyCSS: true,
+            minifyURLs: true,
+          },
+        }
+        : undefined
+    )
+  );
+}
