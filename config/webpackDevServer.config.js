@@ -2,11 +2,8 @@
 
 const fs = require('fs');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
-const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const ignoredFiles = require('react-dev-utils/ignoredFiles');
-const redirectServedPath = require('react-dev-utils/redirectServedPathMiddleware');
 const paths = require('./paths');
-const getHttpsConfig = require('./getHttpsConfig');
 
 const host = process.env.HOST || '0.0.0.0';
 const sockHost = process.env.WDS_SOCKET_HOST;
@@ -91,7 +88,6 @@ module.exports = function (proxy, allowedHost) {
       publicPath: paths.publicUrlOrPath.slice(0, -1),
     },
 
-    https: getHttpsConfig(),
     host,
     historyApiFallback: {
       // Paths with dots should still use the history fallback.
@@ -99,9 +95,7 @@ module.exports = function (proxy, allowedHost) {
       disableDotRule: true,
       index: paths.publicUrlOrPath,
     },
-    // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
-    proxy,
-    onBeforeSetupMiddleware(devServer) {
+    setupMiddlewares(middlewares, devServer) {
       // Keep `evalSourceMapMiddleware`
       // middlewares before `redirectServedPath` otherwise will not have any effect
       // This lets us fetch source contents from webpack for the error overlay
@@ -111,6 +105,8 @@ module.exports = function (proxy, allowedHost) {
         // This registers user provided middleware for proxy reasons
         require(paths.proxySetup)(devServer.app);
       }
+
+      return middlewares;
     }
   };
 };
